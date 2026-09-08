@@ -1,37 +1,52 @@
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+```gitignore
+# Dependencies
+node_modules/
 
-# testing
-/coverage
+# Build outputs
+dist/
+build/
+.next/
+out/
 
-# next.js
-/.next/
-/out/
+# Logs
+*.log
 
-# production
-/build
-/dist
+# Environment variables
+.env
+.env.local
+*.env
 
-# misc
-.DS_Store
-*.pem
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# debug
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# OS generated files
+.DS_Store
+Thumbs.db
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# frame assets (6.55 GB)
-public/frames/
+# Coverage directory used by tools like istanbul
+coverage/
+```
