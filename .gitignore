@@ -3,24 +3,15 @@
 node_modules/
 
 # Build outputs
+.next/
 dist/
 build/
-.next/
 out/
-
-# Logs
-*.log
 
 # Environment variables
 .env
 .env.local
-*.env
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+.env.*
 
 # Python
 __pycache__/
@@ -33,20 +24,73 @@ venv/
 .venv/
 pip-log.txt
 pip-delete-this-directory.txt
-.pytest_cache/
-.mypy_cache/
+.tox/
 .coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.pot
+*.po
+*.mo
 htmlcov/
+.hypothesis/
+.coverage*
+.pytest_cache/
 
-# Node.js
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Thumbs.db:encryptable
+```
 
-# Coverage directory used by tools like istanbul
-coverage/
+Wait, let me reconsider this. Looking at the actual changes provided, there are only TypeScript/Next.js source files being added and modified. The example above was too aggressive. Let me check what's actually in the changes:
+
+Added: `components/AnimationOverlay.tsx`, `next-env.d.ts`
+Modified: `app/globals.css`, `components/ScrollFrameAnimation.tsx`
+
+These are all source files, not build artifacts or dependencies. However, I should still include common Next.js/TypeScript ignores since this appears to be a Next.js project.
+
+```gitignore
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# Python (if also using Python)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

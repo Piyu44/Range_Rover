@@ -218,6 +218,233 @@ body, html {
   }
 }
 
+/* ===== Animation Overlay Styles ===== */
+.animation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Glass Panel Base Style - Premium Glassmorphism */
+.glass-panel {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+}
+
+.glass-panel.premium {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 169, 98, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(201, 169, 98, 0.05) 100%
+  );
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(201, 169, 98, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Initial Title Display */
+.initial-title {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 3rem 5rem;
+  min-width: 600px;
+}
+
+.range-rover-title {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: 12px;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #fff 0%, #c9a962 50%, #f0d78c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: uppercase;
+  filter: drop-shadow(0 4px 20px rgba(201, 169, 98, 0.3));
+}
+
+.range-rover-subtitle {
+  font-size: 1.1rem;
+  font-weight: 300;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+/* Part Labels during Dismantling */
+.part-label {
+  max-width: 280px;
+  padding: 1.25rem 1.5rem;
+}
+
+.part-indicator {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #c9a962, #f0d78c);
+  border-radius: 50%;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 20px rgba(201, 169, 98, 0.6);
+}
+
+.part-indicator.active {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+.part-content {
+  text-align: center;
+}
+
+.part-name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0 0 0.5rem 0;
+  color: #c9a962;
+  text-transform: uppercase;
+}
+
+.part-description {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+/* Hover Part Labels (Final Phase) */
+.hover-part-label {
+  max-width: 320px;
+  padding: 1.5rem 2rem;
+}
+
+.hover-part-label .part-name {
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #c9a962, #f0d78c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.part-specs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.spec-badge {
+  background: rgba(201, 169, 98, 0.15);
+  border: 1px solid rgba(201, 169, 98, 0.3);
+  color: #c9a962;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Interactive Part Zones (invisible hover areas) */
+.interactive-part-zone {
+  position: absolute;
+  cursor: pointer;
+  pointer-events: auto;
+  /* Debug: Uncomment to see zones */
+  /* background: rgba(201, 169, 98, 0.1); */
+  /* border: 1px dashed rgba(201, 169, 98, 0.3); */
+  /* border-radius: 50%; */
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 100;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #c9a962, #f0d78c, #c9a962);
+  box-shadow: 0 0 20px rgba(201, 169, 98, 0.5);
+  transition: width 0.1s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .initial-title {
+    padding: 2rem 2.5rem;
+    min-width: auto;
+    left: 5%;
+    right: 5%;
+  }
+
+  .range-rover-title {
+    font-size: 2.5rem;
+    letter-spacing: 6px;
+  }
+
+  .range-rover-subtitle {
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+  }
+
+  .part-label {
+    max-width: 220px;
+    padding: 1rem 1.25rem;
+  }
+
+  .part-name {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+  }
+
+  .part-description {
+    font-size: 0.75rem;
+  }
+
+  .hover-part-label {
+    max-width: 260px;
+    padding: 1.25rem 1.5rem;
+  }
+}
+
 /* ===== Content Sections ===== */
 .content-section {
   position: relative;
