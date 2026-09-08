@@ -1,6 +1,7 @@
-```gitignore
 # Dependencies
 node_modules/
+/.pnp
+.pnp.js
 
 # Build outputs
 .next/
@@ -13,33 +14,6 @@ out/
 .env.local
 .env.*
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.pot
-*.po
-*.mo
-htmlcov/
-.hypothesis/
-.coverage*
-.pytest_cache/
-
 # Logs
 *.log
 npm-debug.log*
@@ -48,49 +22,11 @@ yarn-error.log*
 
 # OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-Thumbs.db:encryptable
-```
 
-Wait, let me reconsider this. Looking at the actual changes provided, there are only TypeScript/Next.js source files being added and modified. The example above was too aggressive. Let me check what's actually in the changes:
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
 
-Added: `components/AnimationOverlay.tsx`, `next-env.d.ts`
-Modified: `app/globals.css`, `components/ScrollFrameAnimation.tsx`
-
-These are all source files, not build artifacts or dependencies. However, I should still include common Next.js/TypeScript ignores since this appears to be a Next.js project.
-
-```gitignore
-# Dependencies
-node_modules/
-
-# Build outputs
-.next/
-dist/
-out/
-
-# Environment variables
-.env
-.env.local
-.env.*
-
-# Python (if also using Python)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-env/
-venv/
-.venv/
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-```
+# Large Image Frame Assets (6.55 GB)
+public/frames/
