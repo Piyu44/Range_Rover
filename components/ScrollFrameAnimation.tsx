@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { getTotalFrames } from '../lib/frameSequences';
 import { getFrameUrl } from '../lib/frameUtils';
-import AnimationOverlay from './AnimationOverlay';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -18,7 +17,6 @@ const ScrollFrameAnimation: React.FC = () => {
   const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
   const lastRenderedIndexRef = useRef<number>(-1);
   const playheadRef = useRef({ frame: 0 });
-  const [currentFrame, setCurrentFrame] = useState<number>(0);
 
   const totalFrames = getTotalFrames();
 
@@ -213,7 +211,19 @@ const ScrollFrameAnimation: React.FC = () => {
           const direction = self.progress >= lastProgress ? 1 : -1;
           lastProgress = self.progress;
           const targetIndex = Math.round(playheadRef.current.frame);
-          setCurrentFrame(targetIndex);
+          
+          // Emit telemetry to Luxury HUD
+          window.dispatchEvent(
+            new CustomEvent('animation-telemetry', {
+              detail: {
+                frame: targetIndex,
+                progress: self.progress,
+                sequenceIndex: Math.min(4, Math.floor(targetIndex / 960)),
+                totalFrames,
+              },
+            })
+          );
+
           loadFramesAround(targetIndex, direction);
         },
       },
@@ -223,8 +233,20 @@ const ScrollFrameAnimation: React.FC = () => {
       },
     });
 
+    // Support smooth waypoint seeking from Luxury HUD
+    const handleSeekToProgress = (e: Event) => {
+      const customEvent = e as CustomEvent<{ progress: number }>;
+      if (customEvent.detail && typeof customEvent.detail.progress === 'number') {
+        const maxScroll = scrollTrackHeight - window.innerHeight;
+        const targetScroll = customEvent.detail.progress * maxScroll;
+        lenis.scrollTo(targetScroll, { duration: 1.4 });
+      }
+    };
+    window.addEventListener('seek-to-progress', handleSeekToProgress);
+
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('seek-to-progress', handleSeekToProgress);
       window.clearTimeout(idleTimer);
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
@@ -258,9 +280,6 @@ const ScrollFrameAnimation: React.FC = () => {
           }}
         />
       </div>
-      
-      {/* Animation Overlay with Part Labels */}
-      <AnimationOverlay currentFrame={currentFrame} isHoverMode={false} />
       
       <div
         ref={scrollContainerRef}
