@@ -140,11 +140,23 @@ export default function InteractiveCarParts() {
     height: 0,
   });
 
+  const hoveredPartRef = useRef<CarPart | null>(null);
+  const activePartRef = useRef<CarPart | null>(null);
+  const badgeRectRef = useRef<{ left: number; top: number; right: number; bottom: number } | null>(null);
+
+  useEffect(() => {
+    hoveredPartRef.current = hoveredPart;
+  }, [hoveredPart]);
+
+  useEffect(() => {
+    activePartRef.current = activePart;
+  }, [activePart]);
+
   // Calculate rendered car image bounding box on canvas
   const updateCarBounds = () => {
     const viewWidth = window.innerWidth;
     const viewHeight = window.innerHeight;
-    const imgRatio = 16 / 9; // standard ratio of the frame renders
+    const imgRatio = 16 / 9;
     const canvasRatio = viewWidth / viewHeight;
 
     let drawWidth = viewWidth;
@@ -180,12 +192,25 @@ export default function InteractiveCarParts() {
 
     // Global window-level hover detection (100% non-blocking for scrolling)
     const handleWindowMouseMove = (e: MouseEvent) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-
+      if (activePartRef.current) return;
       if (carBounds.width === 0 || carBounds.height === 0) return;
 
-      const relX = (e.clientX - carBounds.x) / carBounds.width;
-      const relY = (e.clientY - carBounds.y) / carBounds.height;
+      const mx = e.clientX;
+      const my = e.clientY;
+
+      // 1. If mouse is inside or approaching the currently displayed badge, keep it active!
+      if (badgeRectRef.current && hoveredPartRef.current) {
+        const b = badgeRectRef.current;
+        const padding = 20;
+        if (mx >= b.left - padding && mx <= b.right + padding && my >= b.top - padding && my <= b.bottom + padding) {
+          document.body.style.cursor = 'pointer';
+          return;
+        }
+      }
+
+      // 2. Otherwise check distance to visible car parts
+      const relX = (mx - carBounds.x) / carBounds.width;
+      const relY = (my - carBounds.y) / carBounds.height;
 
       let found: CarPart | null = null;
       for (const part of visibleParts) {
@@ -199,14 +224,27 @@ export default function InteractiveCarParts() {
       }
 
       setHoveredPart(found);
+      document.body.style.cursor = found ? 'pointer' : 'default';
+    };
+
+    // Click anywhere on the hovered part or badge to inspect
+    const handleWindowClick = (e: MouseEvent) => {
+      if (activePartRef.current) return;
+      if (hoveredPartRef.current) {
+        setActivePart(hoveredPartRef.current);
+        document.body.style.cursor = 'default';
+      }
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('click', handleWindowClick);
 
     return () => {
       window.removeEventListener('resize', updateCarBounds);
       window.removeEventListener('animation-telemetry', handleTelemetry);
       window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('click', handleWindowClick);
+      document.body.style.cursor = 'default';
     };
   }, [visibleParts, carBounds]);
 
@@ -214,19 +252,51 @@ export default function InteractiveCarParts() {
     e.stopPropagation();
     if (hoveredPart) {
       setActivePart(hoveredPart);
+      document.body.style.cursor = 'default';
     }
+  };
+
+  // Compute fixed screen anchor for badge (does NOT run away from cursor)
+  const getBadgeStyle = (part: CarPart) => {
+    const px = carBounds.x + part.relativePos.rx * carBounds.width;
+    const py = carBounds.y + part.relativePos.ry * carBounds.height;
+
+    const badgeWidth = 340;
+    const badgeHeight = 48;
+
+    let left = px + 28;
+    let top = py - 24;
+
+    if (typeof window !== 'undefined') {
+      if (left + badgeWidth > window.innerWidth - 30) {
+        left = px - badgeWidth - 28;
+      }
+      if (top < 90) {
+        top = py + 24;
+      }
+    }
+
+    // Update bounding rect for hover retention
+    badgeRectRef.current = {
+      left,
+      top,
+      right: left + badgeWidth,
+      bottom: top + badgeHeight,
+    };
+
+    return {
+      left: `${left}px`,
+      top: `${top}px`,
+    };
   };
 
   return (
     <div className="interactive-parts-surface">
-      {/* 1. Dynamic Hover Tag following Cursor/Hotspot */}
+      {/* 1. Stably Anchored Luxury Hover Badge */}
       {hoveredPart && !activePart && (
         <div 
           className="car-part-hover-badge"
-          style={{ 
-            left: `${cursorPos.x + 18}px`, 
-            top: `${cursorPos.y - 32}px` 
-          }}
+          style={getBadgeStyle(hoveredPart)}
           onClick={handleBadgeClick}
         >
           <span className="hover-badge-dot"></span>
@@ -234,7 +304,9 @@ export default function InteractiveCarParts() {
             <span className="hover-badge-category">{hoveredPart.category}</span>
             <span className="hover-badge-name">{hoveredPart.name}</span>
           </div>
-          <span className="hover-badge-action">CLICK TO INSPECT</span>
+          <button type="button" className="hover-badge-action" onClick={handleBadgeClick}>
+            INSPECT ↗
+          </button>
         </div>
       )}
 

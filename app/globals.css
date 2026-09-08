@@ -1000,14 +1000,27 @@ canvas {
 }
 
 .hover-badge-action {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: #000;
-  background: var(--gold-primary);
-  padding: 0.2rem 0.55rem;
+  font-family: var(--font-luxury);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #050505;
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
+  border: none;
+  padding: 0.35rem 0.75rem;
   border-radius: 20px;
-  margin-left: 0.2rem;
+  margin-left: 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+  transition: all 0.2s ease;
+}
+
+.hover-badge-action:hover {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
 }
 
 /* Glassmorphism Popover Backdrop */
