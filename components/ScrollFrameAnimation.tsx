@@ -59,7 +59,7 @@ const ScrollFrameAnimation: React.FC = () => {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
@@ -126,7 +126,7 @@ const ScrollFrameAnimation: React.FC = () => {
       lastRenderedIndexRef.current = resolvedIndex;
     }
 
-    // 4. Directional Predictive Preloader
+    // 4. Directional Predictive Preloader with Controlled Concurrency
     const loadingSet = new Set<number>();
 
     function loadSingleImage(idx: number, onLoaded?: () => void) {
@@ -135,7 +135,6 @@ const ScrollFrameAnimation: React.FC = () => {
 
       loadingSet.add(idx);
       const img = new Image();
-      img.decoding = 'async';
       img.onload = () => {
         imagesRef.current[idx] = img;
         loadingSet.delete(idx);
@@ -154,11 +153,11 @@ const ScrollFrameAnimation: React.FC = () => {
 
     let lastLoadedCenter = -1;
     function loadFramesAround(center: number, direction: number = 1) {
-      if (Math.abs(center - lastLoadedCenter) < 5) return;
+      if (Math.abs(center - lastLoadedCenter) < 4) return;
       lastLoadedCenter = center;
 
-      const forwardCount = 80;
-      const backwardCount = 25;
+      const forwardCount = 35;
+      const backwardCount = 12;
 
       const start = direction >= 0 ? center - backwardCount : center - forwardCount;
       const end = direction >= 0 ? center + forwardCount : center + backwardCount;
@@ -171,30 +170,23 @@ const ScrollFrameAnimation: React.FC = () => {
       }
     }
 
-    // Initial frame loading
-    for (let i = 0; i < 60; i++) {
-      loadSingleImage(i, () => {
-        if (i === 0) drawFrame(0);
-      });
-    }
-
-    // Sparse background cache of keyframes (every 8th frame) for instant scrubbing preview
-    let idleKeyframe = 0;
-    let idleTimer: number;
-    function loadSparseKeyframes() {
-      if (idleKeyframe >= totalFrames) return;
-      loadSingleImage(idleKeyframe);
-      idleKeyframe += 8;
-      idleTimer = window.setTimeout(loadSparseKeyframes, 20);
-    }
-    idleTimer = window.setTimeout(loadSparseKeyframes, 300);
+    // Priority Load Frame 0 immediately so screen is NEVER black
+    const initialImg = new Image();
+    initialImg.onload = () => {
+      imagesRef.current[0] = initialImg;
+      drawFrame(0);
+      // Once the first frame is rendered on canvas, load an initial warm buffer
+      for (let i = 1; i <= 25; i++) {
+        loadSingleImage(i);
+      }
+    };
+    initialImg.src = getFrameUrl(0);
 
     // 5. GSAP Smooth Scrub Setup
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
     // Measured, smooth cinematic scrub pacing (~4.8px per frame)
-    // Provides a deliberate, slower pace so you can see every frame unfold clearly
     const scrollTrackHeight = Math.max(window.innerHeight * 3, Math.round(totalFrames * 4.8));
     scrollContainer.style.height = `${scrollTrackHeight}px`;
 
@@ -247,7 +239,6 @@ const ScrollFrameAnimation: React.FC = () => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('seek-to-progress', handleSeekToProgress);
-      window.clearTimeout(idleTimer);
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       tween.kill();

@@ -27,7 +27,7 @@
 
 html, body {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   background-color: var(--bg-obsidian);
   color: var(--silver-bright);
   font-family: var(--font-luxury);
@@ -929,26 +929,33 @@ canvas {
   position: fixed;
   inset: 0;
   z-index: 45;
-  pointer-events: auto;
-  cursor: default;
+  pointer-events: none;
 }
 
 /* Floating Hover Badge */
 .car-part-hover-badge {
   position: fixed;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   z-index: 70;
   display: flex;
   align-items: center;
   gap: 0.8rem;
   padding: 0.55rem 1.1rem;
-  background: rgba(12, 12, 12, 0.78);
+  background: rgba(12, 12, 12, 0.82);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(212, 175, 55, 0.45);
   border-radius: 50px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.25);
   animation: hoverBadgeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.car-part-hover-badge:hover {
+  transform: scale(1.05);
+  border-color: var(--gold-light);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 28px rgba(212, 175, 55, 0.4);
 }
 
 @keyframes hoverBadgeIn {

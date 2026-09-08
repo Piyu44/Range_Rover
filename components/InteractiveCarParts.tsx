@@ -163,6 +163,9 @@ export default function InteractiveCarParts() {
     setCarBounds({ x: offsetX, y: offsetY, width: drawWidth, height: drawHeight });
   };
 
+  // Filter parts relevant to current angle/sequence
+  const visibleParts = CAR_PARTS.filter(p => p.sequences.includes(currentSequence));
+
   useEffect(() => {
     updateCarBounds();
     window.addEventListener('resize', updateCarBounds);
@@ -173,54 +176,49 @@ export default function InteractiveCarParts() {
         setCurrentSequence(customEvent.detail.sequenceIndex);
       }
     };
-
     window.addEventListener('animation-telemetry', handleTelemetry);
+
+    // Global window-level hover detection (100% non-blocking for scrolling)
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      setCursorPos({ x: e.clientX, y: e.clientY });
+
+      if (carBounds.width === 0 || carBounds.height === 0) return;
+
+      const relX = (e.clientX - carBounds.x) / carBounds.width;
+      const relY = (e.clientY - carBounds.y) / carBounds.height;
+
+      let found: CarPart | null = null;
+      for (const part of visibleParts) {
+        const dx = relX - part.relativePos.rx;
+        const dy = relY - part.relativePos.ry;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= part.relativePos.radius) {
+          found = part;
+          break;
+        }
+      }
+
+      setHoveredPart(found);
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+
     return () => {
       window.removeEventListener('resize', updateCarBounds);
       window.removeEventListener('animation-telemetry', handleTelemetry);
+      window.removeEventListener('mousemove', handleWindowMouseMove);
     };
-  }, []);
+  }, [visibleParts, carBounds]);
 
-  // Filter parts relevant to current angle/sequence
-  const visibleParts = CAR_PARTS.filter(p => p.sequences.includes(currentSequence));
-
-  // Detect mouse hover over car part hot-zones
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    setCursorPos({ x: e.clientX, y: e.clientY });
-
-    if (carBounds.width === 0 || carBounds.height === 0) return;
-
-    // Convert mouse to relative car coordinates (0 to 1)
-    const relX = (e.clientX - carBounds.x) / carBounds.width;
-    const relY = (e.clientY - carBounds.y) / carBounds.height;
-
-    // Check if within any part hot-zone
-    let found: CarPart | null = null;
-    for (const part of visibleParts) {
-      const dx = relX - part.relativePos.rx;
-      const dy = relY - part.relativePos.ry;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist <= part.relativePos.radius) {
-        found = part;
-        break;
-      }
-    }
-
-    setHoveredPart(found);
-  };
-
-  const handleContainerClick = () => {
+  const handleBadgeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (hoveredPart) {
       setActivePart(hoveredPart);
     }
   };
 
   return (
-    <div 
-      className="interactive-parts-surface"
-      onMouseMove={handleMouseMove}
-      onClick={handleContainerClick}
-    >
+    <div className="interactive-parts-surface">
       {/* 1. Dynamic Hover Tag following Cursor/Hotspot */}
       {hoveredPart && !activePart && (
         <div 
@@ -229,6 +227,7 @@ export default function InteractiveCarParts() {
             left: `${cursorPos.x + 18}px`, 
             top: `${cursorPos.y - 32}px` 
           }}
+          onClick={handleBadgeClick}
         >
           <span className="hover-badge-dot"></span>
           <div className="hover-badge-text">
