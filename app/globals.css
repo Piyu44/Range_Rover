@@ -1,0 +1,39 @@
+@import 'lenis/dist/lenis.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: #222;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+}
+
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.scroll-container {
+  /* Height will be dynamically set to allow scrolling */
+  width: 100%;
+  z-index: 0;
+}
