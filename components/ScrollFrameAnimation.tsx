@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { getTotalFrames } from '../lib/frameSequences';
 import { getFrameUrl } from '../lib/frameUtils';
+import AnimationOverlay from './AnimationOverlay';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -17,6 +18,7 @@ const ScrollFrameAnimation: React.FC = () => {
   const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
   const lastRenderedIndexRef = useRef<number>(-1);
   const playheadRef = useRef({ frame: 0 });
+  const [currentFrame, setCurrentFrame] = useState<number>(0);
 
   const totalFrames = getTotalFrames();
 
@@ -211,6 +213,7 @@ const ScrollFrameAnimation: React.FC = () => {
           const direction = self.progress >= lastProgress ? 1 : -1;
           lastProgress = self.progress;
           const targetIndex = Math.round(playheadRef.current.frame);
+          setCurrentFrame(targetIndex);
           loadFramesAround(targetIndex, direction);
         },
       },
@@ -255,6 +258,10 @@ const ScrollFrameAnimation: React.FC = () => {
           }}
         />
       </div>
+      
+      {/* Animation Overlay with Part Labels */}
+      <AnimationOverlay currentFrame={currentFrame} isHoverMode={false} />
+      
       <div
         ref={scrollContainerRef}
         style={{
