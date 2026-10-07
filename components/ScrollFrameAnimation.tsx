@@ -28,14 +28,14 @@ const ScrollFrameAnimation: React.FC = () => {
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
-    // 1. Initialize Lenis Smooth Scrolling with Controlled Cinematic Pacing
+    // 1. Initialize Lenis Smooth Scrolling with Fluid 90FPS Response
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1.05, // Controlled, measured scroll response
+      wheelMultiplier: 1.15, // Responsive, high-framerate scroll feel
       touchMultiplier: 1.8,
     });
 
@@ -140,7 +140,7 @@ const ScrollFrameAnimation: React.FC = () => {
         loadingSet.delete(idx);
         if (onLoaded) onLoaded();
 
-        const currentTarget = Math.round(playheadRef.current.frame);
+        const currentTarget = Math.min(totalFrames - 1, Math.max(0, Math.round(playheadRef.current.frame)));
         if (Math.abs(currentTarget - idx) <= 1) {
           drawFrame(currentTarget);
         }
@@ -153,11 +153,12 @@ const ScrollFrameAnimation: React.FC = () => {
 
     let lastLoadedCenter = -1;
     function loadFramesAround(center: number, direction: number = 1) {
-      if (Math.abs(center - lastLoadedCenter) < 4) return;
+      if (Math.abs(center - lastLoadedCenter) < 3) return;
       lastLoadedCenter = center;
 
-      const forwardCount = 35;
-      const backwardCount = 12;
+      // Generous buffer for fast 90fps scroll velocity
+      const forwardCount = 45;
+      const backwardCount = 18;
 
       const start = direction >= 0 ? center - backwardCount : center - forwardCount;
       const end = direction >= 0 ? center + forwardCount : center + backwardCount;
@@ -170,24 +171,27 @@ const ScrollFrameAnimation: React.FC = () => {
       }
     }
 
-    // Priority Load Frame 0 immediately so screen is NEVER black
-    const initialImg = new Image();
-    initialImg.onload = () => {
-      imagesRef.current[0] = initialImg;
+    // Priority Load Frame 0 (start) and final frame (end of website) immediately
+    loadSingleImage(0, () => {
       drawFrame(0);
-      // Once the first frame is rendered on canvas, load an initial warm buffer
-      for (let i = 1; i <= 25; i++) {
+      // Preload initial forward buffer
+      for (let i = 1; i <= 30; i++) {
         loadSingleImage(i);
       }
-    };
-    initialImg.src = getFrameUrl(0);
+    });
+
+    // Ensure the final frame is pre-cached so reaching the end of the site is instantaneous
+    loadSingleImage(totalFrames - 1);
+    for (let i = totalFrames - 2; i >= Math.max(0, totalFrames - 15); i--) {
+      loadSingleImage(i);
+    }
 
     // 5. GSAP Smooth Scrub Setup
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Measured, smooth cinematic scrub pacing (~4.8px per frame)
-    const scrollTrackHeight = Math.max(window.innerHeight * 3, Math.round(totalFrames * 4.8));
+    // Responsive scroll pacing tuned for fluid ~90fps scrub playback
+    const scrollTrackHeight = Math.max(window.innerHeight * 3, Math.round(totalFrames * 4.2));
     scrollContainer.style.height = `${scrollTrackHeight}px`;
 
     let lastProgress = 0;
@@ -198,11 +202,18 @@ const ScrollFrameAnimation: React.FC = () => {
         trigger: scrollContainer,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 1.0, // Smooth continuous inertia with controlled speed
+        scrub: 0.6, // Low-latency, ultra-smooth continuous tracking for 90fps feel
         onUpdate: (self) => {
           const direction = self.progress >= lastProgress ? 1 : -1;
           lastProgress = self.progress;
-          const targetIndex = Math.round(playheadRef.current.frame);
+
+          // If at the very end of the website, strictly lock to the final frame
+          if (self.progress >= 0.999) {
+            drawFrame(totalFrames - 1);
+            return;
+          }
+
+          const targetIndex = Math.min(totalFrames - 1, Math.max(0, Math.round(playheadRef.current.frame)));
           
           // Emit telemetry to Luxury HUD
           window.dispatchEvent(
@@ -210,7 +221,7 @@ const ScrollFrameAnimation: React.FC = () => {
               detail: {
                 frame: targetIndex,
                 progress: self.progress,
-                sequenceIndex: Math.min(4, Math.floor(targetIndex / 960)),
+                sequenceIndex: Math.min(4, Math.floor((targetIndex / totalFrames) * 5)),
                 totalFrames,
               },
             })
@@ -220,8 +231,13 @@ const ScrollFrameAnimation: React.FC = () => {
         },
       },
       onUpdate: () => {
-        const frameIdx = Math.round(playheadRef.current.frame);
-        drawFrame(frameIdx);
+        // At the bottom of the page, ensure the last image is displayed
+        if (playheadRef.current.frame >= totalFrames - 1.05) {
+          drawFrame(totalFrames - 1);
+        } else {
+          const frameIdx = Math.min(totalFrames - 1, Math.max(0, Math.round(playheadRef.current.frame)));
+          drawFrame(frameIdx);
+        }
       },
     });
 

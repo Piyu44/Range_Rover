@@ -21,28 +21,28 @@ const SEQUENCE_DETAILS = [
     num: "02",
     title: "ALL-TERRAIN ARCHITECTURE",
     subtitle: "Adaptive Dynamics & electronic air suspension with dynamic response",
-    frameStart: 960,
+    frameStart: 192,
     progress: 0.2,
   },
   {
     num: "03",
     title: "SCULPTED ELEGANCE",
     subtitle: "Minimalist character line and floating roofline design",
-    frameStart: 1920,
+    frameStart: 384,
     progress: 0.4,
   },
   {
     num: "04",
     title: "SIGNATURE LIGHTING",
     subtitle: "Hidden-until-lit vertical rear tail lamps with crystalline optics",
-    frameStart: 2880,
+    frameStart: 576,
     progress: 0.6,
   },
   {
     num: "05",
     title: "ROAD PRESENCE",
     subtitle: "Commanding stance with active all-wheel steering agility",
-    frameStart: 3840,
+    frameStart: 768,
     progress: 0.8,
   },
 ];
@@ -60,7 +60,7 @@ export default function LuxuryHUD() {
     frame: 0,
     progress: 0,
     sequenceIndex: 0,
-    totalFrames: 4800,
+    totalFrames: 960,
   });
   const [isAudioActive, setIsAudioActive] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);

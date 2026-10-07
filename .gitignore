@@ -30,3 +30,4 @@ next-env.d.ts
 
 # Large Image Frame Assets (6.55 GB)
 public/frames/
+public/1_frames/
